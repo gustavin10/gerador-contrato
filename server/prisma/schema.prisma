@@ -1,0 +1,46 @@
+// Banco: SQLite. Um arquivo unico, sem servidor separado — suficiente para o
+// volume deste projeto e simples de rodar localmente.
+// Em producao (Railway) o arquivo vive num volume persistente montado em /app/data.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Contract {
+  id String @id @default(cuid())
+
+  // Qual modelo de contrato foi usado: "prestacao-servico" | "freelance"
+  template String
+
+  // CONTRATADA — quem presta o servico
+  contractorName    String
+  contractorDoc     String
+  contractorAddress String
+
+  // CONTRATANTE — quem paga
+  clientName    String
+  clientDoc     String
+  clientAddress String
+
+  // Objeto do contrato
+  serviceDescription String
+
+  // Valor sempre em centavos (inteiro). Evita erro de arredondamento de float
+  // em dinheiro — a formatacao em R$ acontece so na hora de exibir.
+  valueCents Int
+
+  paymentTerms String
+  startDate    String // ISO "yyyy-mm-dd"
+  deadlineDays Int
+  city         String
+  conditions   String? // clausulas extras digitadas pelo usuario (opcional)
+
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}
