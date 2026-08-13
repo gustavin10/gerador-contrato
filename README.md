@@ -4,7 +4,7 @@ Aplicação web que monta contratos de prestação de serviço a partir de um fo
 mostra o resultado em tempo real e gera o PDF final no servidor. Todo contrato gerado
 fica no histórico e pode ser baixado de novo a qualquer momento.
 
-**[Ver funcionando](https://gerador-contrato.vercel.app)** · o link abre com um contrato
+**[Ver funcionando](https://gerador-de-contratos-beta.vercel.app)** · o link abre com um contrato
 de exemplo já preenchido, então dá para ver o resultado antes de digitar qualquer coisa.
 
 ```
@@ -352,13 +352,13 @@ do PDF passa a valer também para os contratos antigos.
 ### Fechando o CORS
 
 Volte na Railway e coloque a URL da Vercel em `CORS_ORIGIN` (ex.:
-`https://gerador-contrato.vercel.app`). O serviço reinicia sozinho. Sem isso, o navegador
+`https://gerador-de-contratos-beta.vercel.app`). O serviço reinicia sozinho. Sem isso, o navegador
 bloqueia as chamadas do front para a API.
 
 Para liberar também os previews de branch da Vercel, separe por vírgula:
 
 ```
-CORS_ORIGIN=https://gerador-contrato.vercel.app,https://gerador-contrato-git-dev.vercel.app
+CORS_ORIGIN=https://gerador-de-contratos-beta.vercel.app,https://gerador-de-contratos-beta-git-dev.vercel.app
 ```
 
 ### Checklist depois do deploy
