@@ -1,5 +1,4 @@
-/* Paleta e tipografia herdadas do portfólio, para os dois projetos parecerem
-   parte do mesmo conjunto. */
+/* Mesma paleta do meu portfolio */
 :root {
   --void: #070a12;
   --deep: #0b111c;
@@ -13,7 +12,7 @@
   --text: #e7ecf3;
   --muted: #8b96ac;
 
-  /* A folha do preview é clara de propósito: contrato é documento impresso. */
+  /* a folha do preview e clara: contrato e documento impresso */
   --papel: #f7f5f0;
   --tinta: #16191f;
 }
@@ -242,7 +241,7 @@ body {
 .campo input::placeholder,
 .campo textarea::placeholder { color: #55627a; }
 
-/* O seletor de data do Chrome vem com ícone escuro sobre fundo escuro. */
+/* o icone do date picker do Chrome vem escuro sobre fundo escuro */
 .campo input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(.7); cursor: pointer; }
 
 .campo--erro input,
@@ -310,7 +309,7 @@ body {
 }
 @keyframes girar { to { transform: rotate(360deg); } }
 
-/* --- a folha A4 --- */
+/* folha A4 */
 
 .folha {
   background: var(--papel);

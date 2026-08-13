@@ -1,88 +1,54 @@
 # Gerador de Contratos
 
 Aplicação web que monta contratos de prestação de serviço a partir de um formulário,
-mostra o resultado em tempo real e gera o PDF final no servidor. Todo contrato gerado
-fica no histórico e pode ser baixado de novo a qualquer momento.
+mostra o resultado em tempo real e gera o PDF no servidor. Os contratos gerados ficam
+num histórico e podem ser baixados de novo.
 
-**[Ver funcionando](https://gerador-de-contratos-beta.vercel.app)** · o link abre com um contrato
-de exemplo já preenchido, então dá para ver o resultado antes de digitar qualquer coisa.
+**[Ver funcionando](https://gerador-de-contratos-beta.vercel.app)** - o link já abre com
+um contrato de exemplo preenchido.
 
 ```
-React (Vite)  ──HTTP──▶  Express  ──▶  Prisma  ──▶  SQLite
-   Vercel                        Railway            arquivo .db
-                                    │
-                                    └──▶ PDFKit ──▶ PDF (gerado sob demanda)
+React (Vite)  --HTTP-->  Express  -->  Prisma  -->  SQLite
+   Vercel                      Railway         arquivo .db em volume
+                                  |
+                                  +--> PDFKit --> PDF
 ```
-
----
-
-## Sumário
-
-- [O que faz](#o-que-faz)
-- [Como rodar localmente](#como-rodar-localmente)
-- [Por que PDFKit](#por-que-pdfkit-e-não-puppeteer)
-- [Como o preview e o PDF ficam iguais](#como-o-preview-e-o-pdf-ficam-iguais)
-- [Estrutura de pastas](#estrutura-de-pastas)
-- [API](#api)
-- [Modelo de dados](#modelo-de-dados)
-- [Deploy](#deploy)
-- [Decisões técnicas](#decisões-técnicas)
-
----
 
 ## O que faz
 
-- **Formulário** com as partes (contratante e contratada), descrição do serviço, valor,
-  forma de pagamento, data de início, prazo, cidade do foro e condições específicas.
-- **Dois modelos de contrato:**
-  - *Prestação de Serviço* — completo, com obrigações das duas partes, rescisão e foro.
-  - *Freelance* — enxuto, com cláusulas de autonomia (sem vínculo empregatício),
-    propriedade intelectual, revisões e confidencialidade.
-- **Preview em tempo real** — o contrato é remontado enquanto se digita (com debounce
-  de 400ms) e aparece numa folha que imita a página impressa.
-- **PDF gerado no servidor**, em A4, com valor por extenso, numeração automática de
-  cláusulas, assinaturas e rodapé com identificação e paginação.
-- **Histórico** de tudo que foi gerado, com opção de reabrir no formulário ou baixar o
-  PDF de novo.
+- Formulário com as duas partes, descrição do serviço, valor, forma de pagamento,
+  data de início, prazo, cidade do foro e condições específicas.
+- Dois modelos: *Prestação de Serviço* (completo, com obrigações das duas partes,
+  rescisão e foro) e *Freelance* (mais enxuto, com autonomia, propriedade intelectual,
+  revisões e sigilo).
+- Preview em tempo real enquanto se digita.
+- PDF em A4 com valor por extenso, numeração automática de cláusulas, linha de
+  assinatura e rodapé com paginação.
+- Histórico com opção de reabrir no formulário ou baixar o PDF de novo.
 
-O valor sai por extenso no contrato — `R$ 7.800,00 (sete mil e oitocentos reais)` —
-seguindo a regra do português para o conector: *"dois mil **e** oitocentos"* (centena
-exata) contra *"dois mil, oitocentos **e** cinquenta"*.
+O valor sai por extenso: `R$ 7.800,00 (sete mil e oitocentos reais)`. O conector segue a
+regra do português, "dois mil e oitocentos" para centena exata e "dois mil, oitocentos e
+cinquenta" nos outros casos.
 
----
+## Rodando localmente
 
-## Como rodar localmente
+Precisa de Node 20 ou superior. São dois terminais, um para a API e outro para o front.
 
-**Pré-requisitos:** Node.js 20 ou superior (`node -v` para conferir) e npm.
-
-Você vai precisar de **dois terminais** — um para a API, outro para o front.
-
-### 1. Clonar
-
-```bash
-git clone https://github.com/gustavin10/gerador-contrato.git
-cd gerador-contrato
-```
-
-### 2. Back-end (terminal 1)
+**API:**
 
 ```bash
 cd server
 npm install
-cp .env.example .env      # no Windows: copy .env.example .env
-npx prisma migrate dev    # cria o banco SQLite e as tabelas
+cp .env.example .env
+npx prisma migrate dev
 npm run dev
 ```
 
-A API sobe em `http://localhost:3333`. Para conferir, abra `http://localhost:3333/health`.
+Sobe em `http://localhost:3333`. Para conferir: `http://localhost:3333/health`.
 
-Opcional — dois contratos de exemplo no histórico:
+Se quiser dois contratos de exemplo no histórico, rode `npm run db:seed`.
 
-```bash
-npm run db:seed
-```
-
-### 3. Front-end (terminal 2)
+**Front:**
 
 ```bash
 cd web
@@ -90,64 +56,55 @@ npm install
 npm run dev
 ```
 
-Abra `http://localhost:5173`. Não precisa criar `.env` aqui: em desenvolvimento o Vite
-faz proxy de `/api` para a porta 3333 (veja `web/vite.config.js`).
+Abra `http://localhost:5173`. Não precisa de `.env` aqui, o Vite faz proxy de `/api`
+para a porta 3333.
 
-### Scripts disponíveis
+### Scripts
 
-| Pasta    | Comando            | O que faz                                      |
-|----------|--------------------|------------------------------------------------|
-| `server` | `npm run dev`      | API com reload automático (`node --watch`)      |
-| `server` | `npm start`        | API em modo produção                            |
-| `server` | `npm run db:migrate` | Cria/aplica migrations em desenvolvimento     |
-| `server` | `npm run db:deploy`  | Aplica migrations em produção                 |
-| `server` | `npm run db:studio`  | Abre o Prisma Studio para inspecionar o banco |
-| `server` | `npm run db:seed`    | Popula o histórico com exemplos               |
-| `web`    | `npm run dev`      | Vite em modo desenvolvimento                    |
-| `web`    | `npm run build`    | Build de produção em `web/dist`                 |
-| `web`    | `npm run preview`  | Serve o build localmente                        |
+| Pasta | Comando | O que faz |
+|---|---|---|
+| server | `npm run dev` | API com reload automático |
+| server | `npm start` | API em produção |
+| server | `npm run db:migrate` | Cria e aplica migrations |
+| server | `npm run db:deploy` | Aplica migrations em produção |
+| server | `npm run db:studio` | Abre o Prisma Studio |
+| server | `npm run db:seed` | Popula o histórico com exemplos |
+| web | `npm run dev` | Vite em desenvolvimento |
+| web | `npm run build` | Build de produção |
 
----
+## Por que PDFKit
 
-## Por que PDFKit (e não Puppeteer)
+Testei três caminhos antes de decidir:
 
-A geração de PDF é a parte central do projeto, então a escolha da biblioteca foi a
-decisão técnica mais importante. Avaliei três caminhos:
+**Puppeteer** renderiza HTML e imprime, o que dá fidelidade perfeita com o preview. O
+problema é que ele baixa um Chromium inteiro, uns 300 MB, e sobe um navegador a cada
+requisição. Consome muita memória e deixa o cold start em vários segundos, o que não
+cabe no plano gratuito da Railway.
 
-| Biblioteca | Como funciona | Peso | Por que não / por que sim |
-|---|---|---|---|
-| **Puppeteer** | Sobe um Chromium headless, renderiza HTML e imprime | ~300 MB | Fidelidade perfeita com o preview, mas exige um navegador inteiro no container. Estoura a memória do plano gratuito da Railway e deixa o cold start em vários segundos |
-| **pdfmake** | Documento declarado como objeto JSON | ~2 MB | Bom para tabelas, mas menos controle fino sobre posicionamento — e o contrato precisa de linha de assinatura e rodapé em coordenada exata |
-| **PDFKit** ✅ | API imperativa que desenha direto no PDF | ~2 MB | **Escolhida** |
+**pdfmake** declara o documento como objeto JSON. É bom para tabelas, mas dá menos
+controle sobre posicionamento, e aqui eu precisava de linha de assinatura e rodapé em
+coordenada exata.
 
-**A escolha foi PDFKit**, por quatro motivos:
+**PDFKit** foi o escolhido:
 
-1. **Sem navegador headless.** O container roda com Node puro. Na Railway isso significa
-   build mais rápido, menos memória e nenhuma dependência de sistema para instalar —
-   o que mantém o projeto dentro do plano gratuito.
-2. **Cold start rápido.** Gerar um contrato de duas páginas leva alguns milissegundos,
-   contra os segundos que o Chromium levaria só para iniciar.
-3. **Controle exato do layout.** Contrato é documento formal: margem de 2,5 cm,
-   justificação, quebra de página que não deixa título de cláusula órfão no rodapé,
-   linha de assinatura numa posição precisa. Com PDFKit isso é código explícito, não
-   uma negociação com o engine de CSS do navegador.
-4. **Acentuação sem fonte externa.** As fontes padrão do PDF (Helvetica) usam
-   codificação WinAnsi, que cobre todo o português — `ç`, `ã`, `õ`, `é`. Nenhum arquivo
-   `.ttf` precisa ser embarcado.
+- Roda em Node puro, sem navegador. Build mais rápido, menos memória e nenhuma
+  dependência de sistema para instalar no container.
+- Gera um contrato de duas páginas em milissegundos.
+- Permite controlar o layout ponto a ponto: margem de 2,5 cm, texto justificado, quebra
+  de página que não deixa título de cláusula sozinho no rodapé.
+- As fontes padrão do PDF usam codificação WinAnsi, que cobre todo o português. Não
+  precisei embarcar nenhum arquivo de fonte.
 
-**O custo dessa escolha:** o layout é escrito em código, não em CSS, e o preview em HTML
-precisa ser mantido em sintonia com o PDF por conta própria. A seção seguinte explica
-como o projeto resolve isso.
+O custo é que o layout fica em código, não em CSS, e o preview em HTML precisa ser
+mantido em sintonia com o PDF. A seção abaixo explica como resolvi isso.
 
----
+## Preview e PDF sempre iguais
 
-## Como o preview e o PDF ficam iguais
+O risco de um gerador de documentos é o preview divergir do arquivo final, com duas
+implementações do mesmo texto se afastando com o tempo.
 
-O problema clássico de um gerador de documentos é o preview divergir do arquivo final —
-duas implementações do mesmo texto que vão se separando com o tempo.
-
-Aqui existe **uma fonte da verdade só**: `server/src/templates/index.js`. Ele recebe os
-dados do formulário e devolve uma estrutura neutra, sem HTML e sem PDF:
+Aqui `server/src/templates/index.js` é a única fonte. Ele recebe os dados do formulário
+e devolve o contrato como estrutura de dados, sem HTML e sem PDF:
 
 ```js
 {
@@ -155,90 +112,58 @@ dados do formulário e devolve uma estrutura neutra, sem HTML e sem PDF:
   intro: ["PADARIA CENTRAL LTDA., inscrito(a) sob o nº ...", ...],
   clauses: [
     { heading: "CLÁUSULA PRIMEIRA — DO OBJETO", paragraphs: ["..."] },
-    ...
   ],
   closing: "Goiânia, 13 de agosto de 2026.",
-  signatures: [{ role: "CONTRATANTE", name: "...", doc: "..." }, ...]
+  signatures: [{ role: "CONTRATANTE", name: "...", doc: "..." }]
 }
 ```
 
-Quem consome decide como desenhar:
+`POST /api/contracts/preview` devolve esse objeto e o React o renderiza em HTML.
+`server/src/pdf/gerarPdf.js` percorre o mesmo objeto e desenha o PDF. Mudar uma cláusula
+é mexer num arquivo só.
 
-- `POST /api/contracts/preview` devolve esse objeto e o React o renderiza em HTML.
-- `server/src/pdf/gerarPdf.js` percorre o mesmo objeto e o desenha com PDFKit.
+Por isso o preview vem do servidor em vez de ser calculado no navegador: custa uma
+requisição com debounce e elimina a chance de divergência.
 
-Mudar uma cláusula é mexer num arquivo só, e os dois lados acompanham. Por isso o preview
-sai do servidor em vez de ser calculado no navegador: custa uma requisição com debounce e
-elimina a chance de divergência.
-
-A numeração das cláusulas é calculada na montagem, não escrita à mão — a cláusula de
-condições específicas só existe se o campo for preenchido, e as seguintes se renumeram
-sozinhas.
-
----
-
-## Estrutura de pastas
+## Estrutura
 
 ```
-gerador-contrato/
-├── server/                     API — deploy na Railway
-│   ├── prisma/
-│   │   ├── schema.prisma       modelo do banco
-│   │   ├── migrations/         histórico de migrations (versionado)
-│   │   └── seed.js             contratos de exemplo (opcional)
-│   ├── src/
-│   │   ├── lib/
-│   │   │   ├── format.js       moeda, valor por extenso, datas
-│   │   │   ├── prisma.js       instância única do Prisma Client
-│   │   │   └── schema.js       validação da entrada com Zod
-│   │   ├── pdf/
-│   │   │   └── gerarPdf.js     desenha o documento em PDF (PDFKit)
-│   │   ├── routes/
-│   │   │   └── contratos.js    as rotas da API
-│   │   ├── templates/
-│   │   │   └── index.js        os dois modelos de contrato
-│   │   ├── app.js              montagem do Express (CORS, JSON, erros)
-│   │   └── server.js           sobe o servidor e trata SIGTERM
-│   ├── railway.json            configuração de deploy
-│   └── .env.example
-│
-├── web/                        Front-end — deploy na Vercel
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── Formulario.jsx  os campos
-│   │   │   ├── Preview.jsx     a folha A4 na tela
-│   │   │   └── Historico.jsx   lista de contratos gerados
-│   │   ├── api.js              cliente HTTP
-│   │   ├── demo.js             contrato de exemplo pré-preenchido
-│   │   ├── utils.js            formatação de moeda e data
-│   │   ├── styles.css
-│   │   ├── App.jsx             estado e orquestração
-│   │   └── main.jsx
-│   ├── vite.config.js          proxy de /api em desenvolvimento
-│   ├── vercel.json
-│   └── .env.example
-│
-└── README.md
-```
+server/
+  prisma/
+    schema.prisma       modelo do banco
+    migrations/         versionadas
+    seed.js             contratos de exemplo
+  src/
+    lib/format.js       moeda, valor por extenso, datas
+    lib/prisma.js       instância do Prisma Client
+    lib/schema.js       validação com Zod
+    pdf/gerarPdf.js     desenha o PDF
+    routes/contratos.js rotas da API
+    templates/index.js  os dois modelos de contrato
+    app.js              Express, CORS, tratamento de erro
+    server.js           sobe o servidor
 
----
+web/
+  src/
+    components/         Formulario, Preview, Historico
+    api.js              cliente HTTP
+    demo.js             contrato de exemplo
+    utils.js            formatação
+    App.jsx             estado e orquestração
+```
 
 ## API
 
-Base local: `http://localhost:3333`
-
-| Método   | Rota                        | O que faz                                        |
-|----------|-----------------------------|--------------------------------------------------|
-| `GET`    | `/health`                   | Healthcheck usado pela Railway                    |
-| `GET`    | `/api/templates`            | Lista os modelos disponíveis                      |
-| `POST`   | `/api/contracts/preview`    | Monta o contrato **sem gravar** — usado no preview |
-| `POST`   | `/api/contracts`            | Grava o contrato e devolve o documento montado    |
-| `GET`    | `/api/contracts`            | Histórico (mais recentes primeiro, limite 50)     |
-| `GET`    | `/api/contracts/:id`        | Um contrato específico, já montado                |
-| `GET`    | `/api/contracts/:id/pdf`    | Baixa o PDF                                       |
-| `DELETE` | `/api/contracts/:id`        | Remove do histórico                               |
-
-Exemplo:
+| Método | Rota | O que faz |
+|---|---|---|
+| GET | `/health` | Healthcheck |
+| GET | `/api/templates` | Lista os modelos |
+| POST | `/api/contracts/preview` | Monta o contrato sem gravar |
+| POST | `/api/contracts` | Grava e devolve o contrato montado |
+| GET | `/api/contracts` | Histórico, mais recentes primeiro |
+| GET | `/api/contracts/:id` | Um contrato específico |
+| GET | `/api/contracts/:id/pdf` | Baixa o PDF |
+| DELETE | `/api/contracts/:id` | Remove do histórico |
 
 ```bash
 curl -X POST http://localhost:3333/api/contracts \
@@ -247,22 +172,21 @@ curl -X POST http://localhost:3333/api/contracts \
     "template": "freelance",
     "clientName": "Marina Rezende",
     "clientDoc": "CPF 111.111.111-11",
-    "clientAddress": "Rua 24, 340 — Goiânia/GO",
+    "clientAddress": "Rua 24, 340, Goiânia/GO",
     "contractorName": "Gustavo Milhomem",
     "contractorDoc": "CPF 000.000.000-00",
-    "contractorAddress": "Rua das Acácias, 120 — Goiânia/GO",
+    "contractorAddress": "Rua das Acácias, 120, Goiânia/GO",
     "serviceDescription": "Criação de landing page responsiva.",
     "valueCents": 280000,
     "paymentTerms": "50% na assinatura e 50% na entrega",
     "startDate": "2026-08-13",
     "deadlineDays": 15,
-    "city": "Goiânia",
-    "conditions": "Textos fornecidos pelo contratante."
+    "city": "Goiânia"
   }'
 ```
 
-Dados inválidos devolvem `422` com os erros campo a campo, que o front usa para destacar
-os inputs:
+Dado inválido devolve `422` com os erros campo a campo, que o front usa para destacar os
+inputs:
 
 ```json
 {
@@ -271,17 +195,14 @@ os inputs:
 }
 ```
 
----
+## Banco
 
-## Modelo de dados
-
-Uma tabela só — o projeto não tem usuários, então cada contrato é um registro
-independente.
+Uma tabela só, já que o projeto não tem usuários.
 
 ```prisma
 model Contract {
   id                 String   @id @default(cuid())
-  template           String   // "prestacao-servico" | "freelance"
+  template           String
   contractorName     String
   contractorDoc      String
   contractorAddress  String
@@ -289,9 +210,9 @@ model Contract {
   clientDoc          String
   clientAddress      String
   serviceDescription String
-  valueCents         Int      // dinheiro em centavos, nunca float
+  valueCents         Int
   paymentTerms       String
-  startDate          String   // ISO "yyyy-mm-dd"
+  startDate          String
   deadlineDays       Int
   city               String
   conditions         String?
@@ -299,110 +220,62 @@ model Contract {
 }
 ```
 
-**O PDF não é armazenado.** Só os dados vão para o banco; o arquivo é desenhado na hora
-de cada download. Isso tem três consequências boas: nada de blob storage, o botão "baixar
-de novo" continua funcionando depois de qualquer redeploy, e qualquer melhoria no layout
-do PDF passa a valer também para os contratos antigos.
-
----
+O PDF não é armazenado. Só os dados vão para o banco e o arquivo é desenhado a cada
+download. Assim não preciso de storage de arquivo, o "baixar de novo" continua
+funcionando depois de qualquer deploy, e melhorias no layout valem também para contratos
+antigos.
 
 ## Deploy
 
-### Back-end na Railway
+### API na Railway
 
-1. Em [railway.app](https://railway.app), **New Project → Deploy from GitHub repo** e
-   selecione este repositório.
-2. Em **Settings → Root Directory**, coloque `server`. Sem isso a Railway tenta buildar a
-   raiz do repositório e não acha o `package.json` certo.
-3. Em **Settings → Volumes**, adicione um volume com mount path `/app/data`.
+1. New Project, Deploy from GitHub repo.
+2. Settings, Root Directory: `server`. Sem isso o build falha, porque a raiz do
+   repositório não tem `package.json`.
+3. Crie um volume com mount path `/app/data`. O disco do container é apagado a cada
+   deploy, então sem o volume o banco é recriado do zero e o histórico some.
+4. Em Variables, defina `DATABASE_URL` como `file:/app/data/prod.db`. Não crie `PORT`,
+   a Railway injeta a dela.
+5. O `railway.json` aplica as migrations e sobe o servidor.
+6. Settings, Networking, Generate Domain.
 
-   > **Este passo não é opcional.** O sistema de arquivos do container é efêmero: sem o
-   > volume, o arquivo SQLite é recriado do zero a cada deploy e todo o histórico some.
+### Front na Vercel
 
-4. Em **Variables**, defina:
+1. Importe o mesmo repositório.
+2. Root Directory: `web`. O framework é detectado como Vite.
+3. Adicione `VITE_API_URL` com a URL da Railway, sem barra no final.
+4. Deploy.
 
-   | Variável      | Valor                                     |
-   |---------------|-------------------------------------------|
-   | `DATABASE_URL`| `file:/app/data/prod.db`                  |
-   | `CORS_ORIGIN` | a URL da Vercel (preencha após o passo seguinte) |
-
-   Não defina `PORT` — a Railway injeta a dela, e o `server.js` já a lê.
-
-5. O `railway.json` já cuida do resto: aplica as migrations e sobe o servidor
-   (`npx prisma migrate deploy && npm start`), com healthcheck em `/health`.
-6. Em **Settings → Networking**, clique em **Generate Domain**. Guarde a URL —
-   algo como `https://gerador-contrato-api.up.railway.app`.
-
-### Front-end na Vercel
-
-1. Em [vercel.com](https://vercel.com), **Add New → Project** e importe o mesmo repositório.
-2. Em **Root Directory**, selecione `web`. O framework é detectado como Vite.
-3. Em **Environment Variables**, adicione:
-
-   | Variável        | Valor                                              |
-   |-----------------|----------------------------------------------------|
-   | `VITE_API_URL`  | a URL da Railway, **sem barra no final**            |
-
-   > Variáveis `VITE_*` entram no bundle **em tempo de build**. Se você alterar essa
-   > variável depois, precisa refazer o deploy — mudar e só recarregar a página não surte
-   > efeito.
-
-4. **Deploy**.
+Variáveis `VITE_*` entram no bundle durante o build. Se mudar depois, precisa refazer o
+deploy.
 
 ### Fechando o CORS
 
-Volte na Railway e coloque a URL da Vercel em `CORS_ORIGIN` (ex.:
-`https://gerador-de-contratos-beta.vercel.app`). O serviço reinicia sozinho. Sem isso, o navegador
-bloqueia as chamadas do front para a API.
+De volta na Railway, coloque a URL da Vercel em `CORS_ORIGIN`. Sem isso a API aceita
+requisição de qualquer origem. Para liberar mais de um domínio, separe por vírgula.
 
-Para liberar também os previews de branch da Vercel, separe por vírgula:
+## Algumas decisões
 
-```
-CORS_ORIGIN=https://gerador-de-contratos-beta.vercel.app,https://gerador-de-contratos-beta-git-dev.vercel.app
-```
+**Dinheiro em centavos, como inteiro.** Float binário não representa decimais
+exatamente, e num contrato o valor é o dado que não pode ter erro de arredondamento. A
+formatação em reais acontece só na exibição.
 
-### Checklist depois do deploy
+**Requisições de preview numeradas.** Se uma resposta antiga chega depois de uma nova ter
+sido disparada, ela é descartada. Sem isso o preview pisca com conteúdo desatualizado
+enquanto se digita.
 
-- [ ] `https://SUA-API.up.railway.app/health` responde `{"status":"ok"}`
-- [ ] O app na Vercel abre com o contrato de exemplo preenchido e o preview montado
-- [ ] "Baixar PDF" baixa o arquivo e o contrato aparece no histórico
-- [ ] Recarregar a página mantém o histórico (se sumiu, o volume não foi configurado)
-- [ ] Nenhum erro de CORS no console do navegador
+**Campo incompleto não apaga o preview.** Enquanto falta preencher, a tela mantém a
+última versão válida com um aviso, em vez de ficar em branco.
 
----
+**O contrato de exemplo fica no front.** Se viesse da API, os campos ficariam vazios até
+a rede responder, e o plano gratuito da Railway hiberna o serviço quando fica sem uso.
+Estando em `web/src/demo.js`, o formulário já aparece preenchido. Se o preview demorar
+mais de 2,5s, o app avisa que o servidor está acordando.
 
-## Decisões técnicas
-
-**Dinheiro em centavos, como inteiro.** `valueCents: 780000` em vez de `7800.00`. Float
-binário não representa decimais exatamente, e num contrato o valor é a informação que não
-pode ter erro de arredondamento. A formatação em `R$` acontece só na hora de exibir.
-
-**Preview vindo do servidor.** Custa uma requisição com debounce de 400ms, mas garante
-que o que está na tela é exatamente o que sai no PDF. Cada requisição carrega um número
-de sequência: se uma resposta antiga chega depois de uma nova ter sido disparada, ela é
-descartada — sem isso o preview pisca com conteúdo desatualizado enquanto a pessoa digita.
-
-**Validação nos dois lados.** O front valida para dar retorno imediato; o back valida com
-Zod porque é ele quem grava. O erro `422` volta em `{ campo: mensagem }`, formato que o
-React consome direto para destacar os inputs.
-
-**Campos incompletos não apagam o preview.** Enquanto falta preencher, o servidor não
-monta um contrato novo — a tela mantém a última versão válida com um aviso, em vez de
-ficar em branco.
-
-**O exemplo pré-preenchido mora no front.** Poderia vir de uma rota da API, mas então os
-campos ficariam vazios até a rede responder — e o plano gratuito da Railway hiberna o
-serviço quando fica sem uso. Estando em `web/src/demo.js`, o formulário aparece
-preenchido no primeiro frame. Se o preview demorar mais de 2,5s, o app explica que o
-servidor está acordando em vez de mostrar um spinner mudo.
-
-**Rodapé do PDF com a margem zerada.** Detalhe que custou um bug real: o rodapé é escrito
-dentro da margem inferior, e o PDFKit interpreta isso como "o texto não coube", criando
-outra página — que também ganha rodapé, e o documento cresce sem parar. Um contrato de
-duas páginas virava seis. A correção é zerar `page.margins.bottom` durante a escrita do
-rodapé e devolver o valor em seguida.
-
----
+**Rodapé do PDF com a margem zerada.** Esse custou um bug: o rodapé é escrito dentro da
+margem inferior, e o PDFKit entende que o texto não coube e cria outra página, que
+também ganha rodapé. Um contrato de duas páginas virava seis. A correção é zerar
+`page.margins.bottom` enquanto escreve o rodapé e devolver o valor depois.
 
 ## Licença
 

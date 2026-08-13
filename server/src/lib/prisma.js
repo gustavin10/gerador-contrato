@@ -1,8 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 
-// Uma única instância para todo o processo. Em dev, o `node --watch` reinicia
-// o módulo a cada alteração; guardar no globalThis evita abrir uma conexão
-// nova (e vazar) a cada reload.
+// Em dev o `node --watch` recarrega o módulo a cada alteração. Guardar a
+// instância no globalThis evita abrir uma conexão nova a cada reload.
 const globalForPrisma = globalThis;
 
 export const prisma =

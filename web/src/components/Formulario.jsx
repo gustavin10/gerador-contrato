@@ -12,7 +12,6 @@ function Campo({ label, erro, dica, children }) {
 }
 
 export function Formulario({ valores, erros, templates, onChange, onLimpar, onExemplo }) {
-  // Guarda o boilerplate de ler o evento e devolver só o valor.
   const texto = (campo) => ({
     value: valores[campo],
     onChange: (e) => onChange(campo, e.target.value),
@@ -61,7 +60,7 @@ export function Formulario({ valores, erros, templates, onChange, onLimpar, onEx
             <input {...texto('clientDoc')} placeholder="CNPJ 12.345.678/0001-90" autoComplete="off" />
           </Campo>
           <Campo label="Endereço" erro={erros.clientAddress}>
-            <input {...texto('clientAddress')} placeholder="Av. T-9, 1500 — Goiânia/GO" autoComplete="off" />
+            <input {...texto('clientAddress')} placeholder="Av. T-9, 1500, Goiânia/GO" autoComplete="off" />
           </Campo>
         </div>
       </div>
@@ -78,7 +77,7 @@ export function Formulario({ valores, erros, templates, onChange, onLimpar, onEx
             <input {...texto('contractorDoc')} placeholder="CPF 000.000.000-00" autoComplete="off" />
           </Campo>
           <Campo label="Endereço" erro={erros.contractorAddress}>
-            <input {...texto('contractorAddress')} placeholder="Rua das Acácias, 120 — Goiânia/GO" autoComplete="off" />
+            <input {...texto('contractorAddress')} placeholder="Rua das Acácias, 120, Goiânia/GO" autoComplete="off" />
           </Campo>
         </div>
       </div>
@@ -89,7 +88,7 @@ export function Formulario({ valores, erros, templates, onChange, onLimpar, onEx
         <Campo
           label="O que será entregue"
           erro={erros.serviceDescription}
-          dica="Vira a Cláusula do Objeto — quanto mais específico, melhor."
+          dica="Vira a Cláusula do Objeto. Quanto mais específico, melhor."
         >
           <textarea
             {...texto('serviceDescription')}

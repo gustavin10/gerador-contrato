@@ -1,10 +1,6 @@
-/**
- * Contrato de exemplo que abre junto com o app.
- *
- * Fica no front (e não numa rota da API) de propósito: assim os campos
- * aparecem preenchidos no primeiro frame, sem esperar a rede. Quem abre o
- * link em produção vê o resultado pronto antes de digitar qualquer coisa.
- */
+// Contrato que já vem preenchido ao abrir o app, para dar pra ver o
+// resultado sem precisar digitar nada. Fica no front para os campos
+// aparecerem no primeiro frame, sem esperar a rede.
 
 function hoje() {
   const d = new Date();
@@ -17,11 +13,11 @@ export const CONTRATO_EXEMPLO = {
 
   contractorName: 'Gustavo Milhomem',
   contractorDoc: 'CPF 000.000.000-00',
-  contractorAddress: 'Rua das Acácias, 120 — Setor Bueno, Goiânia/GO',
+  contractorAddress: 'Rua das Acácias, 120, Setor Bueno, Goiânia/GO',
 
   clientName: 'Padaria Central Ltda.',
   clientDoc: 'CNPJ 12.345.678/0001-90',
-  clientAddress: 'Av. T-9, 1500 — Setor Marista, Goiânia/GO',
+  clientAddress: 'Av. T-9, 1500, Setor Marista, Goiânia/GO',
 
   serviceDescription:
     'Desenvolvimento de um sistema web para controle de pedidos e emissão de relatórios de vendas, incluindo painel administrativo, cadastro de produtos e treinamento da equipe.',
@@ -35,7 +31,6 @@ export const CONTRATO_EXEMPLO = {
     'Hospedagem e domínio ficam por conta do CONTRATANTE.\nSuporte corretivo incluso por 30 dias após a entrega.',
 };
 
-/** Estado de um formulário zerado, para o botão "Limpar". */
 export const CONTRATO_VAZIO = {
   template: 'prestacao-servico',
   contractorName: '',

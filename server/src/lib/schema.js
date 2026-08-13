@@ -1,18 +1,8 @@
-/**
- * Validação da entrada da API.
- *
- * Nunca confiar no que chega do formulário: o front valida para dar feedback
- * rápido, o back valida porque é ele quem grava no banco. O Zod devolve os
- * erros campo a campo, e a rota repassa isso para o React destacar os inputs.
- */
-
 import { z } from 'zod';
 import { TEMPLATES } from '../templates/index.js';
 
 const idsDeTemplate = TEMPLATES.map((t) => t.id);
 
-// "Preencha X" evita ter que acertar o gênero de cada rótulo
-// ("é obrigatório" vs. "é obrigatória") em toda mensagem.
 const texto = (min, max, campo) =>
   z.string({ required_error: `Preencha ${campo.toLowerCase()}` })
     .trim()
@@ -34,7 +24,7 @@ export const contratoSchema = z.object({
 
   serviceDescription: texto(10, 2000, 'Descrição do serviço'),
 
-  // Em centavos. O front converte o campo mascarado "R$ 4.500,00" antes de enviar.
+  // Em centavos. O front converte o campo mascarado antes de enviar.
   valueCents: z.coerce
     .number({ invalid_type_error: 'Valor inválido' })
     .int('O valor deve ser em centavos, sem casas decimais')
@@ -58,10 +48,7 @@ export const contratoSchema = z.object({
   conditions: z.string().trim().max(4000, 'Condições muito longas').optional().default(''),
 });
 
-/**
- * Converte o erro do Zod em `{ campo: mensagem }` — formato que o front
- * consome direto para pintar os inputs inválidos.
- */
+// Vira { campo: mensagem }, que o front usa para destacar os inputs.
 export function errosPorCampo(erro) {
   const saida = {};
   for (const issue of erro.issues) {

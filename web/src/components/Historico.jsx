@@ -37,8 +37,6 @@ export function Historico({ contratos, carregando, onAbrir, onRemover }) {
             <button type="button" className="btn btn--secundario" onClick={() => onAbrir(contrato.id)}>
               Abrir
             </button>
-            {/* Download direto pela URL: o navegador baixa sem passar o
-                arquivo pelo JavaScript. */}
             <a className="btn btn--secundario" href={api.urlDoPdf(contrato.id)}>
               PDF
             </a>

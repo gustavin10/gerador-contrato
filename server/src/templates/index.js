@@ -1,13 +1,3 @@
-/**
- * Modelos de contrato.
- *
- * Cada template recebe os dados do formulário e devolve um "documento" —
- * uma estrutura neutra de título, parágrafos e cláusulas. Quem consome esse
- * documento decide como desenhá-lo: o React renderiza em HTML no preview, o
- * PDFKit desenha em PDF. Como os dois leem exatamente a mesma saída, o que a
- * pessoa vê na tela é o que sai no arquivo.
- */
-
 import {
   dataPorExtenso,
   emParagrafos,
@@ -39,11 +29,8 @@ const ORDINAIS = [
   'DÉCIMA TERCEIRA', 'DÉCIMA QUARTA', 'DÉCIMA QUINTA',
 ];
 
-/**
- * Numera as cláusulas na ordem em que aparecem. Como algumas são condicionais
- * (a de condições específicas só existe se o usuário preencher o campo), a
- * numeração precisa ser calculada depois da montagem, não escrita na mão.
- */
+// A cláusula de condições específicas só existe se o campo for preenchido,
+// então a numeração é calculada depois da montagem.
 function numerar(clausulas) {
   return clausulas
     .filter(Boolean)
@@ -53,7 +40,6 @@ function numerar(clausulas) {
     }));
 }
 
-/** Valores derivados que todos os modelos usam. */
 function derivar(dados) {
   const fim = somarDias(dados.startDate, dados.deadlineDays);
   return {
@@ -65,7 +51,6 @@ function derivar(dados) {
   };
 }
 
-/** Qualificação das partes — abre todo contrato. */
 function qualificacao(dados) {
   return [
     `${dados.clientName.toUpperCase()}, inscrito(a) sob o nº ${dados.clientDoc}, ` +
@@ -83,10 +68,6 @@ function assinaturas(dados) {
     { role: 'CONTRATADA', name: dados.contractorName, doc: dados.contractorDoc },
   ];
 }
-
-// ---------------------------------------------------------------------------
-// Modelo 1 — Prestação de serviço
-// ---------------------------------------------------------------------------
 
 function prestacaoServico(dados) {
   const d = derivar(dados);
@@ -169,10 +150,6 @@ function prestacaoServico(dados) {
     signatures: assinaturas(dados),
   };
 }
-
-// ---------------------------------------------------------------------------
-// Modelo 2 — Freelance
-// ---------------------------------------------------------------------------
 
 function freelance(dados) {
   const d = derivar(dados);
@@ -268,10 +245,8 @@ export function templateExiste(id) {
   return Object.hasOwn(RENDERIZADORES, id);
 }
 
-/**
- * Monta o documento a partir dos dados do formulário.
- * @returns {{title:string,intro:string[],clauses:Array,closing:string,signatures:Array,meta:object}}
- */
+// Devolve o contrato como estrutura de dados (título, parágrafos, cláusulas).
+// O preview em React e o PDF leem essa mesma saída.
 export function montarContrato(dados) {
   const renderizar = RENDERIZADORES[dados.template];
   if (!renderizar) {

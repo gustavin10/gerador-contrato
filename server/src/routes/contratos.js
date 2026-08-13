@@ -6,7 +6,6 @@ import { montarContrato, TEMPLATES } from '../templates/index.js';
 
 export const rotas = Router();
 
-/** Campos devolvidos na listagem do histórico — o texto completo não é necessário ali. */
 const RESUMO = {
   id: true,
   template: true,
@@ -17,28 +16,20 @@ const RESUMO = {
   createdAt: true,
 };
 
-/** Transforma "Padaria do João Ltda" em "padaria-do-joao-ltda". */
 function slug(texto) {
   return texto
     .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '') // tira os acentos que o NFD separou
+    .replace(/[̀-ͯ]/g, '')
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)/g, '')
     .slice(0, 40);
 }
 
-// ---------------------------------------------------------------------------
-
 rotas.get('/templates', (_req, res) => {
   res.json({ templates: TEMPLATES });
 });
 
-/**
- * Preview: monta o contrato e devolve o documento, sem gravar nada.
- * É o mesmo montarContrato() que o PDF usa — por isso a tela e o arquivo
- * nunca divergem.
- */
 rotas.post('/contracts/preview', (req, res) => {
   const resultado = contratoSchema.safeParse(req.body);
   if (!resultado.success) {
@@ -51,7 +42,6 @@ rotas.post('/contracts/preview', (req, res) => {
   res.json({ document: montarContrato(resultado.data) });
 });
 
-/** Grava o contrato no histórico e devolve o documento montado. */
 rotas.post('/contracts', async (req, res, next) => {
   const resultado = contratoSchema.safeParse(req.body);
   if (!resultado.success) {
@@ -72,7 +62,6 @@ rotas.post('/contracts', async (req, res, next) => {
   }
 });
 
-/** Histórico, do mais recente para o mais antigo. */
 rotas.get('/contracts', async (req, res, next) => {
   const limite = Math.min(Number(req.query.limit) || 50, 100);
 
@@ -88,7 +77,6 @@ rotas.get('/contracts', async (req, res, next) => {
   }
 });
 
-/** Um contrato do histórico, já montado — usado ao reabrir no preview. */
 rotas.get('/contracts/:id', async (req, res, next) => {
   try {
     const contrato = await prisma.contract.findUnique({ where: { id: req.params.id } });
@@ -100,14 +88,9 @@ rotas.get('/contracts/:id', async (req, res, next) => {
   }
 });
 
-/**
- * Download do PDF.
- *
- * O arquivo é gerado na hora, a partir dos dados do banco — não guardamos
- * binário em disco. Isso mantém o "baixar de novo" funcionando mesmo depois
- * de um redeploy, e qualquer melhoria no layout do PDF passa a valer também
- * para os contratos antigos.
- */
+// O PDF é gerado na hora a partir dos dados do banco, sem guardar binário.
+// Assim o download continua funcionando depois de um redeploy e mudanças no
+// layout valem também para os contratos antigos.
 rotas.get('/contracts/:id/pdf', async (req, res, next) => {
   try {
     const contrato = await prisma.contract.findUnique({ where: { id: req.params.id } });

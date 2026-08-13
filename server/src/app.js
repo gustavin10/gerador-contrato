@@ -5,8 +5,7 @@ import { rotas } from './routes/contratos.js';
 export function criarApp() {
   const app = express();
 
-  // Em produção o front vive na Vercel e a API na Railway — domínios
-  // diferentes, então o CORS precisa liberar explicitamente a origem.
+  // Front e API ficam em domínios diferentes em produção.
   // CORS_ORIGIN aceita vários domínios separados por vírgula.
   const origens = (process.env.CORS_ORIGIN ?? '')
     .split(',')
@@ -24,7 +23,6 @@ export function criarApp() {
     });
   });
 
-  // Usada pelo healthcheck da Railway.
   app.get('/health', (_req, res) => res.json({ status: 'ok', uptime: process.uptime() }));
 
   app.use('/api', rotas);
@@ -33,8 +31,8 @@ export function criarApp() {
     res.status(404).json({ error: 'Rota não encontrada' });
   });
 
-  // eslint-disable-next-line no-unused-vars -- o Express só reconhece o handler
-  // de erro se ele tiver os quatro parâmetros.
+  // O Express só reconhece o handler de erro com os quatro parâmetros.
+  // eslint-disable-next-line no-unused-vars
   app.use((erro, _req, res, _next) => {
     console.error('[erro]', erro);
     res.status(500).json({ error: 'Erro interno ao processar a requisição' });

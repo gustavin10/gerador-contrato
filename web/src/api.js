@@ -1,11 +1,5 @@
-/**
- * Cliente da API.
- *
- * Em desenvolvimento VITE_API_URL fica vazia: as chamadas vão para "/api/..."
- * e o proxy do Vite repassa para localhost:3333.
- * Em produção (Vercel) a variável aponta para a URL da Railway.
- */
-
+// Em dev VITE_API_URL fica vazia e o proxy do Vite manda /api para a
+// porta 3333. Em produção aponta para a URL da Railway.
 const BASE = (import.meta.env.VITE_API_URL ?? '').replace(/\/$/, '');
 
 class ErroDaApi extends Error {
@@ -57,7 +51,6 @@ export const api = {
 
   remover: (id) => requisitar(`/contracts/${id}`, { method: 'DELETE' }),
 
-  /** URL de download — usada direto num <a>, o navegador cuida do resto. */
   urlDoPdf: (id) => `${BASE}/api/contracts/${id}/pdf`,
 };
 

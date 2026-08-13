@@ -7,7 +7,7 @@ import { CONTRATO_EXEMPLO, CONTRATO_VAZIO } from './demo.js';
 
 const CAMPOS = Object.keys(CONTRATO_VAZIO);
 
-/** Descarta o que não é campo do formulário (id, createdAt) ao reabrir do histórico. */
+// Descarta id e createdAt ao reabrir um contrato do histórico.
 function somenteCampos(objeto) {
   return Object.fromEntries(CAMPOS.map((campo) => [campo, objeto[campo] ?? '']));
 }
@@ -27,11 +27,10 @@ export default function App() {
 
   const [gerando, setGerando] = useState(false);
   const [aviso, setAviso] = useState(null);
-  const [aba, setAba] = useState('formulario'); // só usado no layout mobile
+  const [aba, setAba] = useState('formulario');
 
-  // Cada preview recebe um número. Se uma resposta antiga chegar depois de
-  // uma nova ter sido disparada, ela é ignorada — senão o preview "pisca"
-  // com conteúdo desatualizado enquanto a pessoa digita.
+  // Numera cada preview para ignorar resposta antiga que chegue depois de
+  // uma nova ter sido disparada.
   const requisicao = useRef(0);
 
   const carregarHistorico = useCallback(async () => {
@@ -39,7 +38,7 @@ export default function App() {
       const { contracts } = await api.historico();
       setHistorico(contracts);
     } catch {
-      // O histórico é secundário: se falhar, o resto do app continua útil.
+      // O histórico é secundário, o resto do app continua funcionando.
     } finally {
       setCarregandoHistorico(false);
     }
@@ -56,8 +55,7 @@ export default function App() {
     carregarHistorico();
   }, [carregarHistorico]);
 
-  // --- Preview ------------------------------------------------------------
-  // Debounce de 400ms: sem isso seria uma requisição por tecla digitada.
+  // Debounce de 400ms, senão seria uma requisição por tecla digitada.
   useEffect(() => {
     const meuNumero = ++requisicao.current;
     setCarregandoPreview(true);
@@ -74,8 +72,8 @@ export default function App() {
         if (meuNumero !== requisicao.current) return;
 
         if (erro.status === 422) {
-          // Campos incompletos são o estado normal de quem está preenchendo:
-          // marcamos os inputs e mantemos na tela o último preview válido.
+          // Campo faltando é normal enquanto se preenche: marca os inputs e
+          // mantém o último preview válido na tela.
           setErros(erro.fields);
           setErroPreview(null);
         } else {
@@ -89,7 +87,6 @@ export default function App() {
     return () => clearTimeout(alarme);
   }, [valores]);
 
-  // Aviso de servidor hibernando — só se a primeira carga demorar.
   useEffect(() => {
     if (documento) return undefined;
     const alarme = setTimeout(() => setLento(true), 2500);
@@ -105,15 +102,13 @@ export default function App() {
     setTimeout(() => setAviso(null), 4500);
   }
 
-  // --- Ações --------------------------------------------------------------
-
   async function gerarPdf() {
     setGerando(true);
     try {
       const { contract } = await api.criar(valores);
 
-      // Navegar para a URL do PDF dispara o download sem descarregar a
-      // página: a resposta vem com Content-Disposition: attachment.
+      // A resposta vem com Content-Disposition: attachment, então navegar
+      // para a URL baixa o arquivo sem descarregar a página.
       window.location.assign(api.urlDoPdf(contract.id));
 
       await carregarHistorico();
@@ -154,10 +149,8 @@ export default function App() {
 
   function reenviarPreview() {
     setErroPreview(null);
-    setValores((atual) => ({ ...atual })); // nova referência → dispara o efeito
+    setValores((atual) => ({ ...atual }));
   }
-
-  // --- Render -------------------------------------------------------------
 
   return (
     <div className="app">
