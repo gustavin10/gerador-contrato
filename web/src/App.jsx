@@ -173,7 +173,7 @@ export default function App() {
         <div className="topo-acoes">
           <a
             className="btn btn--fantasma"
-            href="https://github.com/SEU-USUARIO/gerador-contrato"
+            href="https://github.com/gustavin10/gerador-contrato"
             target="_blank"
             rel="noopener noreferrer"
           >

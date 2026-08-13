@@ -60,7 +60,7 @@ Você vai precisar de **dois terminais** — um para a API, outro para o front.
 ### 1. Clonar
 
 ```bash
-git clone https://github.com/SEU-USUARIO/gerador-contrato.git
+git clone https://github.com/gustavin10/gerador-contrato.git
 cd gerador-contrato
 ```
 
